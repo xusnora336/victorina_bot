@@ -1,6 +1,7 @@
 from aiogram.fsm.state import StatesGroup, State
 
 
+
 class LevelState(StatesGroup):
     level1 = State()
     level2 = State()

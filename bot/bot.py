@@ -30,6 +30,7 @@ async def command_start_handler(message: Message) -> None:
             "tekshirib beramiz!")
     await message.answer_photo(photo=img, caption=text, reply_markup=btn_keyboard)
 
+
 async def main() -> None:
     bot = Bot(token=BOT_TOKEN)
     dp.include_router(router)
