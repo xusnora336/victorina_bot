@@ -1,50 +1,99 @@
 from aiogram import Dispatcher, Router, F
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from keyboards import btn_keyboard
 from keyboards import stop_button
 from state import LevelState
 import random
 router = Router()
 
-@router.message(F.text=="LEVEL 1")
-async def lvl1_handler(message:Message,state:FSMContext,):
-    if message.text == "LEVEL 1":
-        question=f"{random.randrange(1,11)} {random.choice(["+","-","*"])} {random.randrange(1,11)}"
-
-        answer=eval(question)
-        await state.update_data(answer=answer,level1=message.text,true=0, false=0)
-        await message.answer(f"SAVOL: {question} = ?")
-        await state.set_state(LevelState.level1)
-
-@router.message(F.text=="LEVEL 2")
-async def lvl2_handler(message:Message,state:FSMContext,):
-    if message.text == "LEVEL 2":
-        question2=f"{random.randrange(1,51)} {random.choice(["+","-","*"])} {random.randrange(1,51)}"
-
-        answer2=eval(question2)
-        await state.update_data(answer2=answer2,level2=message.text,true=0, false=0)
-        await message.answer(f"SAVOL: {question2} = ?")
-        await state.set_state(LevelState.level2)
-
-@router.message(F.text=="LEVEL 3")
-async def lvl3_handler(message:Message,state:FSMContext,):
-    if message.text == "LEVEL 3":
-        question3=f"{random.randrange(1, 101)} {random.choice(["+","-","*"])} {random.randrange(1, 101)}"
-
-        answer3=eval(question3)
-        await state.update_data(answer3=answer3,level3=message.text,true=0, false=0)
-        await message.answer(f"SAVOL: {question3} = ?")
-        await state.set_state(LevelState.level3)
+def get_min_max_number(level):
+    if level == "LEVEL 1":
+        return 1, 11
+    elif level == "LEVEL 2":
+        return 1, 51
+    elif level=="LEVEL 3":
+        return 1, 101
+    elif level == "LEVEL 4":
+        return 1, 101
 
 
 
-@router.message(F.text=="LEVEL 4")
-async def lvl4_handler(message:Message,state:FSMContext,):
-    if message.text == "LEVEL 4":
-        question4=f"{random.randrange(1,101)} {random.choice(["+","-","*","/"])} {random.randrange(1,101)}"
+@router.message(F.text == "LEVEL 1")
+async def level_1(message: Message, state: FSMContext):
+    question = (f"{random.randint(1, 11)} {random.choice(['+', '-', '*'])}"
+                f" {random.randint(1, 11)}")
+    answer = eval(question)
+    await state.update_data(answer=answer, question=question, level="LEVEL 1",
+                            correct=0, incorrect=0)
+    await message.answer(text=f"SAVOL: {question} = ?", reply_markup=stop_button)
+    await state.set_state(LevelState.javob)
 
-        answer4=eval(question4)
-        await state.update_data(answer=answer4,level4=message.text,true=0, false=0)
-        await message.answer(f"SAVOL: {question4} = ?")
-        await state.set_state(LevelState.level4)
+@router.message(F.text == "LEVEL 2")
+async def level_1(message: Message, state: FSMContext):
+    question = (f"{random.randint(1, 51)} {random.choice(['+', '-', '*'])}"
+                f" {random.randint(1, 51)}")
+    answer = eval(question)
+    await state.update_data(answer=answer, question=question, level="LEVEL 2",
+                            correct=0, incorrect=0)
+    await message.answer(text=f"SAVOL: {question} = ?", reply_markup=stop_button)
+    await state.set_state(LevelState.javob)
+
+@router.message(F.text == "LEVEL 3")
+async def level_1(message: Message, state: FSMContext):
+    question = (f"{random.randint(1, 101)} {random.choice(['+', '-', '*'])}"
+                f" {random.randint(1, 101)}")
+    answer = eval(question)
+    await state.update_data(answer=answer, question=question, level="LEVEL 3",
+                            correct=0, incorrect=0)
+    await message.answer(text=f"SAVOL: {question} = ?", reply_markup=stop_button)
+    await state.set_state(LevelState.javob)
+
+@router.message(F.text == "LEVEL 4")
+async def level_1(message: Message, state: FSMContext):
+    question = (f"{random.randint(1, 11)} {random.choice(['+', '-', '*','/'])}"
+                f" {random.randint(1, 11)}")
+    answer = eval(question)
+    await state.update_data(answer=answer, question=question, level="LEVEl 4",
+                            correct=0, incorrect=0)
+    await message.answer(text=f"SAVOL: {question} = ?", reply_markup=stop_button)
+    await state.set_state(LevelState.javob)
+
+@router.message(F.text == "STOP")
+async def stop(message: Message, state: FSMContext):
+    await message.answer(text="Siz orqaga qayittingiz!",reply_markup=btn_keyboard)
+
+
+@router.message(StateFilter(LevelState.javob))
+async def process_answer(message: Message, state: FSMContext):
+    data = await state.get_data()
+    correct_answer = data.get("answer")
+    correct = data.get("correct", 0)
+    incorrect = data.get("incorrect", 0)
+    print(data)
+    level = data.get("level")
+
+    if message.text == "STOP":
+        pass
+    try:
+        user_answer = int(message.text)
+        if user_answer == correct_answer:
+            correct += 1
+            await message.answer("Javob to'g'ri✅!")
+        else:
+            incorrect += 1
+            await message.answer(f"Javob noto'g'ri❌!\n"
+                                 f" To'g'ri javob {correct_answer}!")
+    except ValueError:
+        await message.answer("Iltimos raqam kiriting")
+
+    min_number, max_number = get_min_max_number(level)
+    question = (f"{random.randint(min_number, max_number)}"
+                f"{random.choice(['+', '-', '*','/'])}"
+                f"{random.randint(min_number, max_number)}")
+    answer = eval(question)
+    await state.update_data(answer=answer, question=question, correct=correct, incorrect=incorrect)
+    await message.answer(text=f"SAVOL: {question} = ?", reply_markup=stop_button)
+
