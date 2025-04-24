@@ -34,6 +34,7 @@ async def command_start_handler(message: Message) -> None:
 async def main() -> None:
     bot = Bot(token=BOT_TOKEN)
     dp.include_router(router)
+    await set_bot_commands(bot)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
