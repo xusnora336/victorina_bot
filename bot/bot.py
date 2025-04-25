@@ -8,6 +8,8 @@ from aiogram.types import Message, FSInputFile, BotCommand
 from dotenv import load_dotenv
 
 from keyboards import btn_keyboard
+from aiogram.client.session.aiohttp import AiohttpSession
+session = AiohttpSession(proxy="http://proxy.server:3128")
 
 load_dotenv()
 
@@ -32,7 +34,9 @@ async def command_start_handler(message: Message) -> None:
 
 
 async def main() -> None:
-    bot = Bot(token=BOT_TOKEN)
+    # bot = Bot(token=BOT_TOKEN)
+    bot = Bot(token=BOT_TOKEN, session=session)
+
     dp.include_router(router)
     await set_bot_commands(bot)
     await dp.start_polling(bot)
